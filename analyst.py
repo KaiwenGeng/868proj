@@ -11,7 +11,7 @@ from llama_index.core.node_parser import TokenTextSplitter
 class News_Analyst:
     def __init__(self, embed_model_name, llm_model_name, device, chunk_size, chunk_overlap,
                  similarity_top_k=10, context_window=8192, max_new_tokens=512, 
-                 HF_API_TOKEN, verbose=True):
+                 verbose=True):
         self.embed_model_name = embed_model_name
         self.llm_model_name = llm_model_name
         self.device = device
@@ -70,7 +70,6 @@ class News_Analyst:
 
 if __name__ == "__main__":
     # Example usage
-
     general_news = get_fmp_news(api_key) 
     forex_news = get_forex_news(api_key, "EURUSD")
 

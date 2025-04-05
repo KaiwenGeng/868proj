@@ -40,8 +40,4 @@ def get_forex_news(api_key, currency_pair):
     return date_content_pairs
     
 
-if __name__ == "__main__":
-    api_key = "7jLb6gpseT5MzWLfY7S2K1drPwLUWFQ5"
-    date_content_pairs = generate_content(api_key)
-    print(date_content_pairs[0])
    

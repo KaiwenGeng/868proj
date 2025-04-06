@@ -1,10 +1,7 @@
 requests
 llama-index 
 llama-index-embeddings-huggingface 
-llama-index-readers-web
-llama-index-llms-openai
 llama-index-llms-huggingface-api
-llama-index-llms-huggingface
 sentence-transformers
 transformers 
 torch

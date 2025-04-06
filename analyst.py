@@ -10,7 +10,7 @@ from llama_index.core.node_parser import TokenTextSplitter
 
 class News_Analyst:
     def __init__(self, embed_model_name, llm_model_name, device, chunk_size, chunk_overlap,
-                 similarity_top_k=10, context_window=8192, max_new_tokens=512, 
+                 similarity_top_k=10, context_window=8192, max_new_tokens=2048, 
                  HF_API_TOKEN="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", verbose=True):
         self.embed_model_name = embed_model_name
         self.llm_model_name = llm_model_name
@@ -40,8 +40,8 @@ class News_Analyst:
         llm = HuggingFaceInferenceAPI(
             model_name=self.llm_model_name,
             token=self.HF_API_TOKEN,
-            context_window=self.context_window,
-            max_new_tokens=self.max_new_tokens,
+            # context_window=self.context_window,
+            # max_new_tokens=self.max_new_tokens,
         )
         
         # Configure settings
@@ -68,45 +68,18 @@ class News_Analyst:
                 
         return response
 
-if __name__ == "__main__":
-    # Example usage
-    api_key = "7jLb6gpseT5MzWLfY7S2K1drPwLUWFQ5"
-    general_news = get_fmp_news(api_key) 
-    forex_news = get_forex_news(api_key, "EURUSD")
-
-    question1 = "Imagine you are an economist, how would recent news impact the macroeconomic outlook? of EU and US?"
-    question2 = "Imagine you are a macro analyst, what impact would the recent news have on the EUR/USD exchange rate?"
-
-    embed_model_name = "sentence-transformers/all-MiniLM-L6-v2"
-    llm_model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
-    device = "cuda"  # or "cpu"
-    
-    # Create instances of the News_Analyst class
-    general_analyst = News_Analyst(
-        embed_model_name=embed_model_name, 
-        llm_model_name=llm_model_name, 
-        device=device,
-        chunk_size=512,
-        chunk_overlap=0,
-        verbose=False,
-        similarity_top_k=10,  
-    )
-    
-    forex_analyst = News_Analyst(
-        embed_model_name=embed_model_name, 
-        llm_model_name=llm_model_name, 
-        device=device,
-        chunk_size=128,
-        chunk_overlap=0,
-        verbose=False,
-        similarity_top_k=10,  
-    )
-    
-    # Analyze the news data
-    general_response = general_analyst.analyze(general_news, question1)
-    print("*********************************************************************")
-    print(general_response)
-
-    forex_response = forex_analyst.analyze(forex_news, question2)
-    print("*********************************************************************")
-    print(forex_response)
+class decision_maker:
+    def __init__(self, llm_model_name, context_window=8192, max_new_tokens=2048, 
+                 HF_API_TOKEN="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", verbose=True):
+        self.llm = HuggingFaceInferenceAPI(
+            model_name=llm_model_name,
+            token=HF_API_TOKEN,
+            # context_window=context_window,
+            # max_new_tokens=max_new_tokens,
+        )
+    def make_decision(self, prompt):
+        # just get the response from the LLM
+        response = self.llm.complete(prompt)
+        return response.text
+        
+        

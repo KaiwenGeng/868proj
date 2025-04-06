@@ -19,7 +19,7 @@ def extract_clean_text(html_content):
     clean_text = re.sub(r'<.*?>', '', html_content)
     return clean_text
 
-def get_fmp_news(api_key):
+def get_fmp_news(api_key):   # Latest General News
     url = "https://financialmodelingprep.com/stable/fmp-articles?apikey=" + api_key 
     data = get_jsonparsed_data(url)
     date_content_pairs = []
@@ -29,7 +29,7 @@ def get_fmp_news(api_key):
         date_content_pairs.append((date, clean_content))
     return date_content_pairs
 
-def get_forex_news(api_key, currency_pair):
+def get_forex_news(api_key, currency_pair): # Latest Forex News
     url = "https://financialmodelingprep.com/stable/news/forex?symbols=" + currency_pair + "&apikey=" + api_key
     data = get_jsonparsed_data(url)
     date_content_pairs = []

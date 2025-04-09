@@ -1,9 +1,11 @@
 from analyst import *
+import time
 if __name__ == "__main__":
     # Example usage
     api_key = "7jLb6gpseT5MzWLfY7S2K1drPwLUWFQ5"
     FOREX_OF_INTEREST = "EURUSD"
     event = input("Enter the event description: ")
+    time_question_received = time.time()
     general_news = get_fmp_news(api_key) 
     forex_news = get_forex_news(api_key, FOREX_OF_INTEREST)
 
@@ -54,5 +56,8 @@ if __name__ == "__main__":
     prompt = f"Image you are a manager of a hedge fund and here are the two analysis from your analysts:\n\n{general_response}\n\n{forex_response}\n\nBased on these two analysis, what is your long/short decision? Please provide a detailed but short answer."
     decision = manager.make_decision(prompt)
     print("-" * 80)
+    time_last_token = time.time()
     print(f"Decision: {decision}")
+    total_time = time_last_token - time_question_received
+    print(f"Total time taken: {total_time:.2f} seconds")
     

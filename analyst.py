@@ -65,7 +65,7 @@ class News_Analyst:
             for node in response.source_nodes:
                 print(node.node.get_content())
                 print("-" * 80)
-                
+        print(type(response))        
         return response
 
 class decision_maker:

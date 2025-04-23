@@ -1,51 +1,20 @@
 from analyst import *
 import time
-if __name__ == "__main__":
-    # Example usage
-    api_key = "7jLb6gpseT5MzWLfY7S2K1drPwLUWFQ5"
-    FOREX_OF_INTEREST = "EURUSD"
-    event = input("Enter the event description: ")
-    time_question_received = time.time()
-    general_news = get_fmp_news(api_key) 
-    forex_news = get_forex_news(api_key, FOREX_OF_INTEREST)
+import json
 
-    
+def get_events():
+    events = []
+    with open('events.json', 'r') as f:
+        for line in f:
+            data = json.loads(line)
+            events.append(data["event"])
+    return events
 
-    question1 = f"Imagine you are an economist doing real-time event based analysis. Here is an event: {event}. What potential impact would this event have on {FOREX_OF_INTEREST} exchange rate from a macroeconomic perspective? Please provide a detailed analysis."
-    question2 = f"image you are a forex trader doing real-time event based trading. Here is an event: {event}. What potential impact would this event have on {FOREX_OF_INTEREST} exchange rate from a trading perspective? Please provide a detailed analysis."
-
-    embed_model_name1 = "sentence-transformers/all-MiniLM-L6-v2"
-    embed_model_name2 = "sentence-transformers/all-MiniLM-L6-v2"
-    llm_model_name1 = "mistralai/Mistral-7B-Instruct-v0.3"
-    llm_model_name2 = "mistralai/Mistral-7B-Instruct-v0.3"
-    device = "cuda"  # or "cpu"
-    
-    # Create instances of the News_Analyst class
-    general_analyst = News_Analyst(
-        embed_model_name=embed_model_name1, 
-        llm_model_name=llm_model_name1, 
-        device=device,
-        chunk_size=512,
-        chunk_overlap=0,
-        verbose=False,
-        similarity_top_k=10,  
-    )
-    
-
-    
-    forex_analyst = News_Analyst(
-        embed_model_name=embed_model_name2, 
-        llm_model_name=llm_model_name2, 
-        device=device,
-        chunk_size=128,
-        chunk_overlap=0,
-        verbose=False,
-        similarity_top_k=10,  
-    )
-    
-    # Analyze the news data
+def analyze(output_file, event):
     general_response = general_analyst.analyze(general_news, question1)
     print("-" * 80)
+    print("-" * 80)
+    print(f'EVENT: {event}')
     print("General analyst's reponse:")
     print(general_response)
     forex_response = forex_analyst.analyze(forex_news, question2)
@@ -60,4 +29,51 @@ if __name__ == "__main__":
     print(f"Decision: {decision}")
     total_time = time_last_token - time_question_received
     print(f"Total time taken: {total_time:.2f} seconds")
-    
+
+
+if __name__ == "__main__":
+
+    # Example usage
+    api_key = "7jLb6gpseT5MzWLfY7S2K1drPwLUWFQ5"
+    FOREX_OF_INTEREST = "EURUSD"
+    events = get_events()
+
+    with open("forex_analysis_output.txt", "w") as output_file:
+        for event in events:
+            print(event)
+            time_question_received = time.time()
+            general_news = get_fmp_news(api_key) 
+            forex_news = get_forex_news(api_key, FOREX_OF_INTEREST)
+
+            question1 = f"Imagine you are an economist doing real-time event based analysis. Here is an event: {event}. What potential impact would this event have on {FOREX_OF_INTEREST} exchange rate from a macroeconomic perspective? Please provide a detailed analysis."
+            question2 = f"image you are a forex trader doing real-time event based trading. Here is an event: {event}. What potential impact would this event have on {FOREX_OF_INTEREST} exchange rate from a trading perspective? Please provide a detailed analysis."
+
+            embed_model_name1 = "sentence-transformers/all-MiniLM-L6-v2"
+            embed_model_name2 = "sentence-transformers/all-MiniLM-L6-v2"
+            llm_model_name1 = "mistralai/Mistral-7B-Instruct-v0.3"
+            llm_model_name2 = "mistralai/Mistral-7B-Instruct-v0.3"
+            device = "cuda"  # or "cpu"
+            
+            # Create instances of the News_Analyst class
+            general_analyst = News_Analyst(
+                embed_model_name=embed_model_name1, 
+                llm_model_name=llm_model_name1, 
+                device=device,
+                chunk_size=512,
+                chunk_overlap=0,
+                verbose=False,
+                similarity_top_k=10,  
+            )
+            
+            forex_analyst = News_Analyst(
+                embed_model_name=embed_model_name2, 
+                llm_model_name=llm_model_name2, 
+                device=device,
+                chunk_size=128,
+                chunk_overlap=0,
+                verbose=False,
+                similarity_top_k=10,  
+            )
+            
+            # Analyze the news data
+            analyze(output_file, event)

@@ -9,6 +9,7 @@ from local_embed import LocalEmbedding
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import Any, Iterator, Dict
 import torch
+import time
 
 
 class LocalLLM(CustomLLM):
@@ -82,24 +83,68 @@ class News_Analyst:
         self.max_new_tokens = max_new_tokens
         self.verbose = verbose
 
+    # def analyze(self, NEWS_DATA, question: str) -> str:
+    #     # start_time = time.time()
+    #     documents = [
+    #         Document(text=f"Date: {date}\nContent: {content}")
+    #         for date, content in NEWS_DATA
+    #     ]
+    #     embed_model = LocalEmbedding(model_name=self.embed_model_name, device=self.device)
+    #     Settings.embed_model = embed_model
+    #
+    #     splitter = TokenTextSplitter(self.chunk_size, self.chunk_overlap)
+    #     nodes = splitter.get_nodes_from_documents(documents)
+    #     index = VectorStoreIndex(nodes)
+    #
+    #     query_engine = index.as_query_engine(
+    #         similarity_top_k=self.similarity_top_k,
+    #         llm=self.llm
+    #     )
+    #
+    #     response = query_engine.query(question)
+    #     # end_time = time.time()
+    #     # print(f"Query Time: {end_time - start_time:.2f} seconds")
+    #     return response.response
+
     def analyze(self, NEWS_DATA, question: str) -> str:
+        start_time = time.time()
+
+        # create documents from the news data
         documents = [
             Document(text=f"Date: {date}\nContent: {content}")
             for date, content in NEWS_DATA
         ]
+
+        # set up the embedding model
         embed_model = LocalEmbedding(model_name=self.embed_model_name, device=self.device)
         Settings.embed_model = embed_model
 
+        # tokenize the documents
         splitter = TokenTextSplitter(self.chunk_size, self.chunk_overlap)
         nodes = splitter.get_nodes_from_documents(documents)
+
+        # build the index
         index = VectorStoreIndex(nodes)
 
-        query_engine = index.as_query_engine(
-            similarity_top_k=self.similarity_top_k,
-            llm=self.llm
-        )
-        response = query_engine.query(question)
-        return response.response
+        # retrieval time
+        retrieval_start = time.time()
+        retriever = index.as_retriever(similarity_top_k=self.similarity_top_k)
+        retrieved_nodes = retriever.retrieve(question)
+        retrieval_end = time.time()
+        print(f"Retrieval Time: {retrieval_end - retrieval_start:.2f} seconds")
+
+        # concatenate the content of the retrieved nodes
+        context = "\n".join([node.get_content() for node in retrieved_nodes])
+        prompt = f"Context:\n{context}\n\nQuestion: {question}\n### Answer:"
+
+        # inference time
+        inference_start = time.time()
+        response = self.llm.complete(prompt, max_new_tokens=self.max_new_tokens)
+        inference_end = time.time()
+        print(f"LLM Inference Time: {inference_end - inference_start:.2f} seconds")
+        print(f"Total Time: {inference_end - start_time:.2f} seconds")
+
+        return response
 
 
 class decision_maker:
@@ -108,4 +153,8 @@ class decision_maker:
         self.max_new_tokens = max_new_tokens
 
     def make_decision(self, prompt: str) -> str:
-        return self.llm.complete(prompt, max_new_tokens=self.max_new_tokens)
+        start_time = time.time()
+        response = self.llm.complete(prompt, max_new_tokens=self.max_new_tokens)
+        end_time = time.time()
+        print(f"Decision Making Time: {end_time - start_time:.2f} seconds")
+        return response
